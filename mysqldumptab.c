@@ -170,11 +170,11 @@ usage(const char *program_invocation_name, FILE *out)
     fputs("  --fields-terminated-by            terminate output fields "
         "with the given string\n", out);
     fputs("  --fields-enclosed-by              enclose output fields "
-        "with the given string\n", out);
+        "with the given character\n", out);
     fputs("  --fields-optionally-enclosed-by   optionally enclose output "
-        "fields with the given string\n", out);
+        "fields with the given character\n", out);
     fputs("  --fields-escaped-by               escape output fields with the "
-        "given string\n", out);
+        "given character\n", out);
     fputs("  --lines-terminated-by             terminate lines with the "
         "given string\n", out);
     fputs("\n", out);

@@ -48,9 +48,9 @@ Options:
   -A, --having                      having clause
 
   --fields-terminated-by            terminate output fields with the given string
-  --fields-enclosed-by              enclose output fields with the given string
-  --fields-optionally-enclosed-by   optionally enclose output fields with the given string
-  --fields-escaped-by               escape output fields with the given string
+  --fields-enclosed-by              enclose output fields with the given character
+  --fields-optionally-enclosed-by   optionally enclose output fields with the given character
+  --fields-escaped-by               escape output fields with the given character
   --lines-terminated-by             terminate lines with the given string
 ```
 

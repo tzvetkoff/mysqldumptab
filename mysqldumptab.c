@@ -280,17 +280,17 @@ main(int argc, char **argv)
             case 'S':
                 select_fields = strdup(optarg);
                 break;
-            case 'w':
+            case 'W':
                 where = strdup(optarg);
                 break;
-            case 'g':
+            case 'O':
+                order = strdup(optarg);
+                break;
+            case 'G':
                 group = strdup(optarg);
                 break;
-            case 'a':
+            case 'A':
                 having = strdup(optarg);
-                break;
-            case 'o':
-                order = strdup(optarg);
                 break;
 
             case 0x1000:

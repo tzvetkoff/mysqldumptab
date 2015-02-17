@@ -15,6 +15,7 @@
 #define MYSQLDUMPTAB_DEFAULT_PASSWORD ""
 #define MYSQLDUMPTAB_DEFAULT_HOST "localhost"
 #define MYSQLDUMPTAB_DEFAULT_PORT 3306
+#define MYSQLDUMPTAB_DEFAULT_CHARSET "UTF8"
 
 /* define some types that may be missing on older mysql versions */
 #ifndef MYSQL_TYPE_TIMESTAMP2
@@ -53,7 +54,7 @@
 
 /* global variables */
 static char *username = NULL, *password = NULL, *host = NULL,
-    *sock = NULL, *database = NULL, *table = NULL,
+    *sock = NULL, *charset = NULL, *database = NULL, *table = NULL,
     *select_fields = NULL, *where = NULL, *group = NULL,
     *having = NULL, *order = NULL,
     *fields_terminated_by = NULL, fields_enclosed_by = 0,
@@ -82,6 +83,9 @@ exit_handler()
     }
     if (sock) {
         free(sock);
+    }
+    if (charset) {
+        free(charset);
     }
     if (database) {
         free(database);
@@ -148,6 +152,8 @@ usage(const char *program_invocation_name, FILE *out)
     fprintf(out, "  -P, --port                        set mysql port [%d]\n",
         MYSQLDUMPTAB_DEFAULT_PORT);
     fputs("  -s, --socket                      set mysql socket\n", out);
+    fputs("  -C, --charset                     set connection character set ["
+        MYSQLDUMPTAB_DEFAULT_CHARSET "]\n", out);
     fputs("\n", out);
 
     fputs("  -H, --help                        display this help and exit\n",
@@ -198,6 +204,7 @@ main(int argc, char **argv)
         {"host", required_argument, NULL, 'h'},
         {"port", required_argument, NULL, 'P'},
         {"socket", required_argument, NULL, 's'},
+        {"charset", required_argument, NULL, 'C'},
 
         {"help", no_argument, NULL, 'H'},
         {"version", no_argument, NULL, 'V'},
@@ -224,6 +231,7 @@ main(int argc, char **argv)
     host = strdup(MYSQLDUMPTAB_DEFAULT_HOST);
     port = MYSQLDUMPTAB_DEFAULT_PORT;
     sock = NULL;
+    charset = strdup(MYSQLDUMPTAB_DEFAULT_CHARSET);
 
     fields_terminated_by = strdup("\t");
     lines_terminated_by = strdup("\n");
@@ -234,7 +242,7 @@ main(int argc, char **argv)
     atexit(exit_handler);
 
     /* parse command line options */
-    while ((ch = getopt_long(argc, argv, "+u:p::h:P:s:HVMBS:W:O:G:A:",
+    while ((ch = getopt_long(argc, argv, "+u:p::h:P:s:C:HVMBS:W:O:G:A:",
         longopts, NULL)) != -1) {
         switch (ch) {
             case 'u':
@@ -262,6 +270,10 @@ main(int argc, char **argv)
                 break;
             case 's':
                 sock = strdup(optarg);
+                break;
+            case 'C':
+                free(charset);
+                charset = strdup(optarg);
                 break;
 
             case 'H':
@@ -349,8 +361,22 @@ main(int argc, char **argv)
     free(password);
     password = NULL;
 
-    /* build query */
+    /* allocate query buffer */
     query = mdt_str_alloc();
+
+    /* set charset */
+    if (charset && strlen(charset)) {
+        mdt_str_concat(query, "SET CHARSET %s", charset);
+
+        if (mysql_query(connection, query->ptr) != 0) {
+            mdt_str_free(query);
+            fprintf(stderr, "%s\n", mysql_error(connection));
+            return EXIT_FAILURE;
+        }
+    }
+    mdt_str_clear(query);
+
+    /* build query */
     mdt_str_concat(query, "SELECT /*!40001 SQL_NO_CACHE */ %s FROM ",
         select_fields ? select_fields : "*");
     mdt_str_concat(query, "%s", table);

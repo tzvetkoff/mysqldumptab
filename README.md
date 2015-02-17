@@ -35,6 +35,7 @@ Options:
   -h, --host                        set mysql host [localhost]
   -P, --port                        set mysql port [3306]
   -s, --socket                      set mysql socket
+  -C, --charset                     set connection character set [UTF8]
 
   -H, --help                        display this help and exit
   -V, --version                     print version information and exit

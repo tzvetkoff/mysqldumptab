@@ -1,0 +1,10 @@
+Jun 03, 2015 - Version 0.1.0
+=======================================================================
+* Refactored build system
+* Got rid of gettext
+* Refactored the code to some extent
+* Added -o option
+
+Mar 23, 2015 - Version 0.0.1
+=======================================================================
+* Initial release

@@ -1,14 +1,14 @@
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <getopt.h>
 
-#include <my_global.h>
 #include <mysql.h>
 
-#include "mdt_str.h"
-
-#define MYSQLDUMPTAB_VERSION "0.0.1"
+#include "str.h"
 
 /* default connection stuff */
 #define MYSQLDUMPTAB_DEFAULT_USERNAME ""
@@ -31,7 +31,9 @@
 #endif
 
 /* print block */
-#define MDT_PRINT_BUFFER_BLOCK_SIZE 0x4000
+#ifndef MYSQLDUMPTAB_BUFFER_BLOCK_SIZE
+#define MYSQLDUMPTAB_BUFFER_BLOCK_SIZE 0x4000
+#endif
 
 /* does anyone use this type? */
 #define MDT_NULL(x) (\
@@ -62,7 +64,9 @@ static char *username = NULL, *password = NULL, *host = NULL,
     *lines_terminated_by = NULL, *print_buffer = NULL;
 static unsigned int port, fields_terminated_by_length;
 static unsigned long print_buffer_size;
-char *enclose;
+static char *enclose;
+
+static FILE *fo = NULL;
 
 static MYSQL *connection = NULL;
 static MYSQL_RES *result = NULL;
@@ -123,6 +127,9 @@ exit_handler()
     if (fields) {
         free(fields);
     }
+    if (fo && fo != stdout) {
+        fclose(fo);
+    }
     if (result) {
         mysql_free_result(result);
     }
@@ -154,6 +161,8 @@ usage(const char *program_invocation_name, FILE *out)
     fputs("  -s, --socket                      set mysql socket\n", out);
     fputs("  -C, --charset                     set connection character set ["
         MYSQLDUMPTAB_DEFAULT_CHARSET "]\n", out);
+    fputs("  -o, --output-file                 write output to file instead of"
+        " stdout\n", out);
     fputs("\n", out);
 
     fputs("  -H, --help                        display this help and exit\n",
@@ -192,11 +201,11 @@ usage(const char *program_invocation_name, FILE *out)
 int
 main(int argc, char **argv)
 {
-    int ch, n, n1, password_prompt = 0, buffer = 0, enclose_char;
-    unsigned long i, j, k, size_needed, length, *lengths;
-    char *p, *src, *dst;
-    struct mdt_str_t *query;
-    MYSQL_ROW row;
+    static int ch, n, n1, password_prompt = 0, buffer = 0, enclose_char;
+    static unsigned long i, j, k, size_needed, length, *lengths;
+    static char *p, *src, *dst, *fo_name = NULL;
+    static struct mdt_str_t *query;
+    static MYSQL_ROW row;
 
     static const struct option longopts[] = {
         {"username", required_argument, NULL, 'u'},
@@ -232,17 +241,18 @@ main(int argc, char **argv)
     port = MYSQLDUMPTAB_DEFAULT_PORT;
     sock = NULL;
     charset = strdup(MYSQLDUMPTAB_DEFAULT_CHARSET);
+    fo = stdout;
 
     fields_terminated_by = strdup("\t");
     lines_terminated_by = strdup("\n");
-    print_buffer_size = MDT_PRINT_BUFFER_BLOCK_SIZE;
+    print_buffer_size = MYSQLDUMPTAB_BUFFER_BLOCK_SIZE;
     print_buffer = malloc(print_buffer_size);
 
     /* register the exit handler */
     atexit(exit_handler);
 
     /* parse command line options */
-    while ((ch = getopt_long(argc, argv, "+u:p::h:P:s:C:HVMBS:W:O:G:A:",
+    while ((ch = getopt_long(argc, argv, "u:p::h:P:s:C:o:HVMBS:W:O:G:A:",
         longopts, NULL)) != -1) {
         switch (ch) {
             case 'u':
@@ -275,12 +285,19 @@ main(int argc, char **argv)
                 free(charset);
                 charset = strdup(optarg);
                 break;
+            case 'o':
+                if (strcmp(optarg, "-") == 0) {
+                    fo_name = NULL;
+                } else {
+                    fo_name = optarg;
+                }
+                break;
 
             case 'H':
                 usage(argv[0], stdout);
                 break;
             case 'V':
-                puts(MYSQLDUMPTAB_VERSION);
+                puts(MYSQLDUMPTAB_VERSION_STRING);
                 return EXIT_SUCCESS;
             case 'M':
                 puts(mysql_get_client_info());
@@ -331,6 +348,14 @@ main(int argc, char **argv)
     /* check for 2 positional arguments */
     if (argc - optind != 2) {
         usage(argv[0], stderr);
+    }
+
+    /* open output file */
+    if (fo_name) {
+        if ((fo = fopen(fo_name, "w")) == NULL) {
+            fprintf(stderr, "Unable to open output file \"%s\"\n", fo_name);
+            return EXIT_FAILURE;
+        }
     }
 
     fields_terminated_by_length = strlen(fields_terminated_by);
@@ -447,8 +472,8 @@ main(int argc, char **argv)
 
         if (print_buffer_size < size_needed) {
             print_buffer_size = floor((double)size_needed /
-                (double)MDT_PRINT_BUFFER_BLOCK_SIZE) *
-                MDT_PRINT_BUFFER_BLOCK_SIZE;
+                (double)MYSQLDUMPTAB_BUFFER_BLOCK_SIZE) *
+                MYSQLDUMPTAB_BUFFER_BLOCK_SIZE;
             print_buffer = realloc(print_buffer, print_buffer_size);
             if (!print_buffer) {
                 fprintf(stderr, "Cannot grow print buffer to %lu bytes\n",
@@ -511,8 +536,8 @@ main(int argc, char **argv)
 
         *dst = '\0';
 
-        fputs(print_buffer, stdout);
-        fputs(lines_terminated_by, stdout);
+        fputs(print_buffer, fo);
+        fputs(lines_terminated_by, fo);
     }
 
     /* hasta la vista, baby! */

@@ -74,7 +74,7 @@ compare() {
 	shift
 
 	mysql mdt_test -Bse "${q}"
-	${DIR}/../mysqldumptab ${MYSQL_USER} ${MYSQL_PASS} ${@} mdt_test test_cases > ${d}
+	${DIR}/../src/mysqldumptab ${MYSQL_USER} ${MYSQL_PASS} ${@} mdt_test test_cases > ${d}
 
 	cmp ${m} ${d} || {
 		echo "${q}"

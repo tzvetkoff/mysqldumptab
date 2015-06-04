@@ -8,16 +8,32 @@ A console tool that dumps MySQL tables as whatever-separated data.
 
 `mysqldumptab` leverages that as it dumps a table in the exact same format as `SELECT INTO OUTFILE` but does that on the client side.
 
+## Dependencies
+
+A compiler.
+
+MySQL client libraries and `build-essential` or `devel`, depending on your OS.
+
 ## Installation
 
-No install scripts right now. Just do:
+Just like any software that comes with `configure` scripts:
 
 ``` bash
-make
-cp mysqldumptab /usr/local/bin
+./bootstrap
+./configure --disable-shared --prefix=/usr/local
+make install clean
 ```
 
-in a terminal and you're good to go.
+## Tweaking
+
+The configure script provides several options for tweaking:
+
+
+| Option                         | Description                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| `--disable-shared`             | Link the resulting binary against static libraries only. **Recommended**.                |
+| `--with-mysql-config`          | Provide an alternate path to `mysql_config`.                                             |
+| `--with-buffer-block-size=VAL` | Set the growing output buffer block size to `VAL`. The default value is `0x4000` (16KB). |
 
 ## Usage
 
@@ -36,6 +52,7 @@ Options:
   -P, --port                        set mysql port [3306]
   -s, --socket                      set mysql socket
   -C, --charset                     set connection character set [UTF8]
+  -o, --output-file                 write output to file instead of stdout
 
   -H, --help                        display this help and exit
   -V, --version                     print version information and exit

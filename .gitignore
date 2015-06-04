@@ -1,6 +1,44 @@
+# MacOS X
 .DS_Store
 ._.*
 *.dSYM
-/mysqldumptab
-/tests/*.tab
-/misc
+
+# Object files, libraries and backups
+*.o
+*.a
+*.la
+*.lo
+*.so
+*~
+*.bak
+
+# Test output
+/test/*.tab
+
+# Binaries
+/src/mysqldumptab
+
+# Just in case
+/build/
+/misc/
+
+# Autotools and other stuff
+stamp-h1
+configure
+Makefile
+Makefile.in
+.deps/
+.libs/
+config.h
+config.h.in
+config.log
+config.status
+libtool
+
+# More autotools
+/aclocal.m4
+/m4/libtool.m4
+/m4/lt*.m4
+/autom4te.cache/
+/config/
+/tmp/

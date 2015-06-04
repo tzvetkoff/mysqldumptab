@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include "mdt_str.h"
+#include "str.h"
 
 struct mdt_str_t *
 mdt_str_alloc()

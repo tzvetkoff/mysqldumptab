@@ -6,6 +6,21 @@ DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 [[ -n ${MYSQL_PASS} ]] && MYSQL_PASS="-p${MYSQL_PASS}"
 [[ -z ${MYSQL_USER} ]] && MYSQL_USER='-uroot'
 
+if [[ -z ${MDT} ]]; then
+	MDT=${DIR}/../src/mysqldumptab
+
+	if [[ ! -x ${MDT} ]]; then
+		MDT=`type -p mysqldumptab`
+
+		if [[ ! -x ${MDT} ]]; then
+			echo "[!!] \`mysqldumptab' binary not found."
+			echo "[!!] If you're running the tests from source, please compile it first."
+			echo "[!!] If not, please install \`mysqldumptab' in \$PATH or set the \$MDT environment variable."
+			exit 1
+		fi
+	fi
+fi
+
 prepare() {
 	rm -f ${DIR}/*.tab
 
@@ -74,7 +89,7 @@ compare() {
 	shift
 
 	mysql mdt_test -Bse "${q}"
-	${DIR}/../src/mysqldumptab ${MYSQL_USER} ${MYSQL_PASS} ${@} mdt_test test_cases > ${d}
+	${MDT} ${MYSQL_USER} ${MYSQL_PASS} ${@} mdt_test test_cases > ${d}
 
 	cmp ${m} ${d} || {
 		echo "${q}"

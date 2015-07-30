@@ -197,6 +197,17 @@ usage(const char *program_invocation_name, FILE *out)
     exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
+/* lazy character parsing */
+static char
+parse_char(char *arg)
+{
+    if (arg[0] == '0' && (arg[1] == 'x' || arg[1] == 'X')) {
+        return strtoul(arg, NULL, 16) & 0xFF;
+    }
+
+    return arg[0];
+}
+
 /* entry point */
 int
 main(int argc, char **argv)
@@ -327,13 +338,13 @@ main(int argc, char **argv)
                 fields_terminated_by = strdup(optarg);
                 break;
             case 0x1001:
-                fields_enclosed_by = optarg[0];
+                fields_enclosed_by = parse_char(optarg);
                 break;
             case 0x1002:
-                fields_optionally_enclosed_by = optarg[0];
+                fields_optionally_enclosed_by = parse_char(optarg);
                 break;
             case 0x1003:
-                fields_escaped_by = optarg[0];
+                fields_escaped_by = parse_char(optarg);
                 break;
             case 0x1004:
                 free(lines_terminated_by);

@@ -4,8 +4,13 @@ SUBDIRS = src test
 dist_doc_DATA = AUTHORS ChangeLog README.md LICENSE.md
 
 maintainer-clean-local:
-	-rm -f aclocal.m4 config.h.in configure config
-	-find ${builddir} -name Makefile.in -exec rm -f '{}' ';'
+	-rm -f ${top_srcdir}/aclocal.m4
+	-rm -f ${top_srcdir}/m4/libtool.m4
+	-rm -f ${top_srcdir}/m4/lt*.m4
+	-rm -f ${top_srcdir}/config.h.in*
+	-rm -f ${top_srcdir}/configure
+	-rm -rf ${top_srcdir}/config
+	-find ${top_srcdir} -name Makefile.in -exec rm -f '{}' ';'
 
 .PHONY: bootstrap
 bootstrap: maintainer-clean

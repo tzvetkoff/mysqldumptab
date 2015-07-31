@@ -458,6 +458,11 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    /* enclose char */
+    enclose_char = fields_enclosed_by ? fields_enclosed_by :
+        fields_optionally_enclosed_by;
+
+    /* figure out whether we should enclose a field based on its type */
     for (i = 0; i < n; ++i) {
         if ((fields[i] = mysql_fetch_field(result)) == NULL) {
             fprintf(stderr, "myslq_field() failed for field #%lu\n", i);
@@ -465,9 +470,9 @@ main(int argc, char **argv)
         }
 
         if (fields_enclosed_by) {
-            enclose[i] = enclose_char = fields_enclosed_by;
+            enclose[i] = fields_enclosed_by;
         } else if (fields_optionally_enclosed_by) {
-            enclose[i] = enclose_char = MDT_ENCLOSE(fields[i]) ?
+            enclose[i] = MDT_ENCLOSE(fields[i]) ?
                 fields_optionally_enclosed_by : 0;
         }
     }

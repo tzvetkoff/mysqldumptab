@@ -41,9 +41,11 @@ Some options like `-uphPs` are the same as `mysqldump`.
 
 If you pass `-p` with no argument, you'll get a password prompt.
 
+Options that take characters support hex format - `--fields-escaped-by=0x5c`.
+
 ```
 Usage:
-  ./mysqldumptab [options] <database> <table>
+  mysqldumptab [options] <database> <table>
 
 Options:
   -u, --username                    set mysql user []

@@ -3,7 +3,7 @@
 # Define the package version numbers, bug reporting link, project homepage.
 m4_define([MYSQLDUMPTAB_VERSION_MAJOR_], [0])
 m4_define([MYSQLDUMPTAB_VERSION_MINOR_], [1])
-m4_define([MYSQLDUMPTAB_VERSION_PATCH_], [1])
+m4_define([MYSQLDUMPTAB_VERSION_PATCH_], [2])
 m4_define([MYSQLDUMPTAB_VERSION_STRING_], [MYSQLDUMPTAB_VERSION_MAJOR_.MYSQLDUMPTAB_VERSION_MINOR_.MYSQLDUMPTAB_VERSION_PATCH_])
 m4_define([MYSQLDUMPTAB_BUGREPORT_URL_], [https://github.com/tzvetkoff/mysqldumptab/issues])
 m4_define([MYSQLDUMPTAB_PROJECT_URL_], [https://github.com/tzvetkoff/mysqldumptab])
